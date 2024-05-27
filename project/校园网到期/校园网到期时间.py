@@ -1,8 +1,11 @@
+import os
 from datetime import datetime
 from tools import send_msg
 from feapder.utils.tools import log
 from feapder import Request
 from setting import LOGIN_USERNAME, LOGIN_PASSWORD, XYW_URL
+
+stop_send_flag = False
 
 
 def a():
@@ -70,15 +73,38 @@ def main(data):
         date1 = datetime.strptime(expire_date, "%Y-%m-%d")
     except:
         msg = f"状态：{expire_date}"
+        stop_or_start(1)
         return msg
+    recover_flag = stop_or_start(0)
     log.info(f"到期时间：{expire_date}")
     date2 = datetime.now()
     difference = date1 - date2
     days_difference = difference.days
     log.info(f"剩余天数：{days_difference}")
-    if days_difference <= 3:
-        msg = f"到期时间：{expire_date}，\n剩余天数：{days_difference}"
+    msg = f"到期时间：{expire_date}，\n剩余天数：{days_difference}"
+    if recover_flag:
+        msg = f"已复通\n{msg}"
+        return msg
+    if days_difference > 3:
+        msg = None
+    # msg = f"到期时间：{expire_date}，\n剩余天数：{days_difference}"
     return msg
+
+
+def stop_or_start(flag=-1):
+    global stop_send_flag
+    filepath = "已停机"
+    filepath_flag = os.path.exists(filepath)
+    stop_send_flag = filepath_flag
+    log.info(f"发送信息：{not filepath_flag}")
+    if flag == 1:
+        with open(filepath, 'w'):
+            log.warning("已停机")
+    if flag == 0 and filepath_flag:
+        os.remove(filepath)
+        log.info("已复通")
+        stop_send_flag = False
+    return filepath_flag
 
 
 if __name__ == '__main__':
@@ -90,6 +116,7 @@ if __name__ == '__main__':
     msg = main(data)
     if msg:
         log.warning(msg)
-        send_msg(msg, keyword="<校园网到期通知>\n")
+        if not stop_send_flag:
+            send_msg(msg, keyword="<校园网到期通知>\n")
     else:
         log.info("到期时间正常")
