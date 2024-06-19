@@ -43,20 +43,21 @@ def c(data, cookie):
             data=data,
             cookies=cookie,
         ).get_response()
+        balance = eval(response3.xpath(
+            "//div[@class='view-main']//div[3]//dl[1]//dt[1]/text()").get().strip())
         danger_state = response3.xpath(
             "(//span[@class='label label-danger'])[1]/text()").get()
         if danger_state:
-            return danger_state
+            return danger_state, balance
         expire_date = response3.xpath(
             "(//span[@class='label label-default'])[2]/text()").get()
     except:
-        return None
+        return None, None
     else:
-        return expire_date
+        return expire_date, balance
 
 
 def main(data):
-    msg = None
     cookie, checkcode = a()
     if not all([cookie, checkcode]):
         msg = "获取cookie失败"
@@ -65,7 +66,7 @@ def main(data):
         msg = "获取验证码失败"
         return msg
     data["checkcode"] = checkcode
-    expire_date = c(data, cookie)
+    expire_date, balance = c(data, cookie)
     if not expire_date:
         msg = "获取到期时间失败"
         return msg
@@ -86,6 +87,8 @@ def main(data):
         msg = f"已复通\n{msg}"
         return msg
     if days_difference > 3:
+        msg = None
+    if balance >= 30:
         msg = None
     # msg = f"到期时间：{expire_date}，\n剩余天数：{days_difference}"
     return msg
