@@ -8,7 +8,7 @@ from setting import LOGIN_USERNAME, LOGIN_PASSWORD, XYW_URL
 stop_send_flag = False
 
 
-def a():
+def get_Cookies():
     try:
         response1 = Request(
             # url="http://self.gzist.edu.cn:8080/Self/login/?302=LI"
@@ -22,7 +22,7 @@ def a():
         return cookie, checkcode
 
 
-def b(cookie):
+def get_Code(cookie):
     try:
         response2 = Request(
             # url="http://self.gzist.edu.cn:8080/Self/login/randomCode",
@@ -35,7 +35,7 @@ def b(cookie):
         return response2
 
 
-def c(data, cookie):
+def Login(data, cookie):
     try:
         response3 = Request(
             # url="http://self.gzist.edu.cn:8080/Self/login/verify",
@@ -57,7 +57,7 @@ def c(data, cookie):
         return expire_date, balance
 
 
-def d(cookie):
+def get_StopState(cookie):
     try:
         response4 = Request(
             # url="http://self.gzist.edu.cn:8080/Self/service/goStop",
@@ -74,16 +74,16 @@ def d(cookie):
 
 
 def main(data):
-    cookie, checkcode = a()
+    cookie, checkcode = get_Cookies()
     if not all([cookie, checkcode]):
         msg = "获取cookie失败"
         return msg
-    if not b(cookie):
+    if not get_Code(cookie):
         msg = "获取验证码失败"
         return msg
     data["checkcode"] = checkcode
-    expire_date, balance = c(data, cookie)
-    is_appointment_stop = d(cookie)
+    expire_date, balance = Login(data, cookie)
+    is_appointment_stop = get_StopState(cookie)
     if not expire_date:
         msg = "获取到期时间失败"
         return msg
