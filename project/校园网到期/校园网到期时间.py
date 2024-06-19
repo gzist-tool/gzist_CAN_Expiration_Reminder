@@ -97,7 +97,7 @@ def main(data):
     log.info(f"到期时间：{expire_date}")
     date2 = datetime.now()
     difference = date1 - date2
-    days_difference = difference.days
+    days_difference = difference.days + 1
     log.info(f"剩余天数：{days_difference}")
     msg = f"到期时间：{expire_date}，\n剩余天数：{days_difference}"
     if recover_flag:
