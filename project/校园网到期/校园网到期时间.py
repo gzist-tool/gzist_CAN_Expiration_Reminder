@@ -57,6 +57,22 @@ def c(data, cookie):
         return expire_date, balance
 
 
+def d(cookie):
+    try:
+        response4 = Request(
+            # url="http://self.gzist.edu.cn:8080/Self/service/goStop",
+            url=f"{XYW_URL}/Self/service/goStop",
+            cookies=cookie,
+        ).get_response()
+        appointment_stop = response4.xpath(
+            '//*[@id="stop"]/@disabled').get()
+        is_appointment_stop = True if appointment_stop else False
+    except:
+        return None
+    else:
+        return is_appointment_stop
+
+
 def main(data):
     cookie, checkcode = a()
     if not all([cookie, checkcode]):
@@ -67,6 +83,7 @@ def main(data):
         return msg
     data["checkcode"] = checkcode
     expire_date, balance = c(data, cookie)
+    is_appointment_stop = d(cookie)
     if not expire_date:
         msg = "获取到期时间失败"
         return msg
@@ -89,6 +106,9 @@ def main(data):
     if days_difference > 3:
         msg = None
     if balance >= 30:
+        if is_appointment_stop:
+            msg = f"预约停机时间：{expire_date}，\n剩余天数：{days_difference}"
+            return msg
         msg = None
     # msg = f"到期时间：{expire_date}，\n剩余天数：{days_difference}"
     return msg
