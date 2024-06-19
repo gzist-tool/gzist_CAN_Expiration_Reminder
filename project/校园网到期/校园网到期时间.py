@@ -110,6 +110,7 @@ def main(data):
             msg = f"预约停机时间：{expire_date}，\n剩余天数：{days_difference}"
             return msg
         msg = None
+    log.info(f"余额：{balance}")
     # msg = f"到期时间：{expire_date}，\n剩余天数：{days_difference}"
     return msg
 
